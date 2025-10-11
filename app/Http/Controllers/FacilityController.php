@@ -15,8 +15,11 @@ class FacilityController extends Controller
         private StateFacilityImportService $importService
     ) {}
 
-public function importStatesAndFacilities(Request $request): JsonResponse
+public function importStatesAndFacilities(Request $request)
 {
+        \Log::info('Starting import process...');
+
+    return 123;
     $validator = Validator::make($request->all(), [
         'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240'
     ], [
