@@ -26,6 +26,11 @@ return new class extends Migration
             $table->string('service_contract_number')->nullable();
             $table->string('product_model')->nullable();
 
+            $table->string('delivery_status')->default('not delivered');
+
+            $table->string('installation_status')->default('not installed');
+
+
             // Quantities
             $table->integer('total_quantity_received')->nullable(); // after customs clearance
             $table->date('date_received_in_country')->nullable();

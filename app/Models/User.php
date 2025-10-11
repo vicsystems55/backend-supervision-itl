@@ -49,4 +49,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    function technician()
+    {
+        return $this->hasOne(Technician::class);
+    }
+
+    public function installationAssignments()
+{
+    return $this->hasMany(InstallationAssignment::class);
+}
+
+public function isTechnicianTeam()
+{
+    return $this->hasAnyRole(['Technician Lead', 'Technician Assistant']);
+}
 }

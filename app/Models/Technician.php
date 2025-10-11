@@ -33,4 +33,10 @@ class Technician extends Model
     {
         return $this->hasMany(FacilityTechnicianAssignment::class);
     }
+
+        public function installations()
+    {
+        return $this->hasMany(Installation::class);
+    }
 }
+

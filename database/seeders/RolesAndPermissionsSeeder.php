@@ -13,6 +13,13 @@ class RolesAndPermissionsSeeder extends Seeder
         // Clear cache to avoid duplicate errors
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Define the guard - use 'api' for API applications
+        $guard = 'api';
+
+        // ---- Clean up existing permissions and roles for this guard ----
+        Permission::where('guard_name', $guard)->delete();
+        Role::where('guard_name', $guard)->delete();
+
         // ---- Define permissions ----
         $permissions = [
             // Users & Roles
@@ -45,7 +52,10 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
+            Permission::create([
+                'name' => $perm,
+                'guard_name' => $guard
+            ]);
         }
 
         // ---- Define roles and assign permissions ----
@@ -61,7 +71,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'manage warehouses', 'view warehouses',
                 'create shipments', 'update shipments', 'view shipments',
             ],
-            'Logistics Officer' => [
+            'Driver' => [
                 'assign trucks', 'update truck location', 'view trucks',
                 'view shipments',
             ],
@@ -79,10 +89,13 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role = Role::create([
+                'name' => $roleName,
+                'guard_name' => $guard
+            ]);
             $role->syncPermissions($rolePermissions);
         }
 
-        echo "✅ Roles and permissions seeded successfully.\n";
+        echo "✅ Roles and permissions seeded successfully for {$guard} guard.\n";
     }
 }

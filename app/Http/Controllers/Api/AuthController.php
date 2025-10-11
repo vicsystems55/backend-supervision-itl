@@ -32,27 +32,42 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|string|email',
+        'password' => 'required|string',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ]);
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    // Get user roles and permissions
+    $roles = $user->getRoleNames(); // Get all role names
+    $permissions = $user->getAllPermissions()->pluck('name'); // Get all permissions
+
+    return response()->json([
+        'message' => 'Login successful',
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+            // Add any other user fields you need
+        ],
+        'roles' => $roles,
+        'permissions' => $permissions,
+    ]);
+}
 
     public function logout(Request $request)
     {
