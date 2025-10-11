@@ -18,7 +18,7 @@ class FacilityController extends Controller
 
 public function importStatesAndFacilities(Request $request)
 {
-        Log::info('Starting import process...');
+        // Log::info('Starting import process...');
 
     return 123;
     // $validator = Validator::make($request->all(), [
