@@ -30,8 +30,8 @@ class FirstUserSeeder extends Seeder
 
         // Create Super Admin User
         $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@itl.com',
+            'name' => 'Eghosa',
+            'email' => 'eghosa@intertradeltd.biz',
             'password' => Hash::make('ITL@2025'),
             'email_verified_at' => now(),
         ]);
