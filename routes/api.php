@@ -41,7 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
-Route::post('/importfacilities', [FacilityController::class, 'importStatesAndFacilities']);
+Route::post('/import/facilities', [FacilityController::class, 'importStatesAndFacilities']);
 Route::get('/import/stats', [FacilityController::class, 'getImportStats']);
 
 Route::post('/import/installations', [InstallationController::class, 'importInstallations']);

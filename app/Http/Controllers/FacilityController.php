@@ -17,7 +17,7 @@ class FacilityController extends Controller
 
 public function importStatesAndFacilities(Request $request)
 {
-    return 123;
+    // return 123;
     $validator = Validator::make($request->all(), [
         'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240'
     ], [
@@ -48,7 +48,7 @@ public function importStatesAndFacilities(Request $request)
 
         // Read the Excel file
         // \Log::info('Attempting to read Excel file...');
-        // $data = Excel::toCollection(null, $file)->first();
+        $data = Excel::toCollection(null, $file)->first();
         // \Log::info('Excel data loaded, count: ' . ($data ? $data->count() : 0));
 
         if (!$data || $data->isEmpty()) {
