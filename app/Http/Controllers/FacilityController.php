@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use Log;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +18,7 @@ class FacilityController extends Controller
 
 public function importStatesAndFacilities(Request $request)
 {
-        \Log::info('Starting import process...');
+        Log::info('Starting import process...');
 
     return 123;
     $validator = Validator::make($request->all(), [

@@ -41,9 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
-Route::post('/importfacilities', function () {
-    return response()->json(['test' => 123]);
-});
+Route::post('/importfacilities', [FacilityController::class, 'importStatesAndFacilities']);
 Route::get('/import/stats', [FacilityController::class, 'getImportStats']);
 
 Route::post('/import/installations', [InstallationController::class, 'importInstallations']);
