@@ -12,31 +12,36 @@ class FirstUserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Super Admin User
-        $superAdmin = User::firstOrCreate(
-            [
-                'email' => 'superadmin@itl.com'
-            ],
-            [
-                'name' => 'Super Admin',
-                'password' => Hash::make('ITL@2025'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // Assign existing Super Admin role to user
-        $superAdminRole = Role::where('name', 'Super Admin')->first();
-
-        if ($superAdminRole) {
-            $superAdmin->assignRole($superAdminRole);
-            $this->command->info('Super Admin user created and role assigned successfully!');
-        } else {
-            $this->command->error('Super Admin role not found! Please make sure roles are seeded first.');
+        // Check if user already exists
+        if (User::where('email', 'superadmin@itl.com')->exists()) {
+            $this->command->info('Super Admin user already exists!');
+            return;
         }
 
-        $this->command->info('Super Admin user details:');
+        // Get the Super Admin role with api guard
+        $superAdminRole = Role::where('name', 'Super Admin')
+            ->where('guard_name', 'api')
+            ->first();
+
+        if (!$superAdminRole) {
+            $this->command->error('Super Admin role not found with api guard! Please run your roles seeder first with the api guard.');
+            return;
+        }
+
+        // Create Super Admin User
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@itl.com',
+            'password' => Hash::make('ITL@2025'),
+            'email_verified_at' => now(),
+        ]);
+
+        // Assign Super Admin role to user with api guard
+        $superAdmin->assignRole($superAdminRole);
+
+        $this->command->info('Super Admin user created successfully!');
         $this->command->info('Email: superadmin@itl.com');
         $this->command->info('Password: ITL@2025');
-        $this->command->info('Role: Super Admin');
+        $this->command->info('Role: Super Admin (api guard)');
     }
 }
