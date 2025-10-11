@@ -360,4 +360,68 @@ class InstallationController extends Controller
             ], 500);
         }
     }
+
+
+    // Add to InstallationController
+public function updateDeliveryStatus(Request $request, $id): JsonResponse
+{
+    try {
+        $request->validate([
+            'status' => 'required|string|in:not delivered,in transit,delivered,partially delivered'
+        ]);
+
+        $installation = Installation::find($id);
+        if (!$installation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Installation not found'
+            ], 404);
+        }
+
+        $installation->update(['delivery_status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $installation,
+            'message' => 'Delivery status updated successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update delivery status: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function updateInstallationStatus(Request $request, $id): JsonResponse
+{
+    try {
+        $request->validate([
+            'status' => 'required|string|in:not installed,in progress,installed,partially installed'
+        ]);
+
+        $installation = Installation::find($id);
+        if (!$installation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Installation not found'
+            ], 404);
+        }
+
+        $installation->update(['installation_status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $installation,
+            'message' => 'Installation status updated successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update installation status: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

@@ -55,6 +55,11 @@ Route::get('/installations/facility/{facilityId}', [InstallationController::clas
 Route::get('/installations/{id}', [InstallationController::class, 'show']);
 Route::patch('/installations/{id}/verification', [InstallationController::class, 'updateVerification']);
 
+// Add these routes
+Route::patch('/installations/{id}/delivery-status', [InstallationController::class, 'updateDeliveryStatus']);
+Route::patch('/installations/{id}/installation-status', [InstallationController::class, 'updateInstallationStatus']);
+Route::put('/installations/{id}', [InstallationController::class, 'update']);
+
 
 Route::apiResource('warehouses', WarehouseController::class);
 
