@@ -185,8 +185,8 @@ class InstallationController extends Controller
         try {
             $stats = [
                 'total_installations' => Installation::count(),
-                'verified_installations' => Installation::where('verified_by_health_officer', true)->count(),
-                'pending_verification' => Installation::where('verified_by_health_officer', false)->count(),
+                'verified_installations' => Installation::where('installation_status', 'installed')->count(),
+                'pending_verification' => Installation::where('delivery_status', 'delivered')->count(),
                 'installations_by_state' => State::withCount(['installations'])->get(),
                 'installations_by_supplier' => Installation::select('supplier')
                     ->selectRaw('COUNT(*) as count')

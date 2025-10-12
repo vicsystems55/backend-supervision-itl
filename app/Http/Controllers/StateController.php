@@ -9,25 +9,58 @@ use Illuminate\Http\Request;
 
 class StateController extends Controller
 {
-    public function index(Request $request): JsonResponse
-    {
-        try {
-            $states = State::all(['id', 'name', 'code', 'latitude', 'longitude']);
+public function index(Request $request): JsonResponse
+{
+    try {
+        $states = State::withCount([
+            'installations as total_supposed_installations',
+            'installations as total_installed' => function ($query) {
+                $query->where('installation_status', 'installed');
+            },
+            'installations as total_delivered' => function ($query) {
+                $query->where('delivery_status', 'delivered');
+            }
+        ])->get(['id', 'name', 'code', 'latitude', 'longitude']);
 
-            return response()->json([
-                'success' => true,
-                'data' => $states,
-                'message' => 'States retrieved successfully'
-            ]);
+        // Alternative approach if you need more detailed aggregation
+        // $states = State::with(['installations'])->get(['id', 'name', 'code', 'latitude', 'longitude']);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve states',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        // Transform the data to include the counts
+        $statesWithDetails = $states->map(function ($state) {
+            return [
+                'id' => $state->id,
+                'name' => $state->name,
+                'code' => $state->code,
+                'latitude' => $state->latitude,
+                'longitude' => $state->longitude,
+                'installation_details' => [
+                    'total_supposed_installations' => $state->total_supposed_installations,
+                    'total_installed' => $state->total_installed,
+                    'total_delivered' => $state->total_delivered,
+                    'installation_rate' => $state->total_supposed_installations > 0
+                        ? round(($state->total_installed / $state->total_supposed_installations) * 100, 2)
+                        : 0,
+                    'delivery_rate' => $state->total_supposed_installations > 0
+                        ? round(($state->total_delivered / $state->total_supposed_installations) * 100, 2)
+                        : 0,
+                ]
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $statesWithDetails,
+            'message' => 'States with installation details retrieved successfully'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve states with installation details',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function show($id): JsonResponse
     {
