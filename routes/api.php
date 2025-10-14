@@ -16,6 +16,15 @@ use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\InstallationAssignmentController;
 use App\Http\Controllers\FacilityTechnicianAssignmentController;
 
+use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\ChecklistSectionController;
+use App\Http\Controllers\ChecklistQuestionController;
+use App\Http\Controllers\InstallationChecklistController;
+use App\Http\Controllers\InstallationChecklistAnswerController;
+use App\Http\Controllers\InstallationChecklistDraftController;
+
+
+
 
 Route::prefix('auth')->group(function () {
 
@@ -122,3 +131,85 @@ Route::apiResource('installation-assignments', InstallationAssignmentController:
 Route::post('installation-assignments/bulk-assign', [InstallationAssignmentController::class, 'bulkAssign']);
 Route::post('installation-assignments/bulk-assign-atomic', [InstallationAssignmentController::class, 'bulkAssignAtomic']);
 
+
+
+/*
+|--------------------------------------------------------------------------
+| API Routes for Checklist System
+|--------------------------------------------------------------------------
+*/
+
+// Checklist management routes
+Route::apiResource('checklists', ChecklistController::class);
+
+// Get active checklist
+Route::get('checklists/active/current', [ChecklistController::class, 'getActiveChecklist']);
+
+// Checklist sections routes
+Route::prefix('checklists/{checklistId}')->group(function () {
+    Route::apiResource('sections', ChecklistSectionController::class);
+
+    // Reorder sections
+    Route::post('sections/reorder', [ChecklistSectionController::class, 'reorder']);
+});
+
+// Checklist questions routes
+Route::prefix('checklists/{checklistId}/sections/{sectionId}')->group(function () {
+    Route::apiResource('questions', ChecklistQuestionController::class);
+
+    // Reorder questions
+    Route::post('questions/reorder', [ChecklistQuestionController::class, 'reorder']);
+
+    // Get validation rules for a question
+    Route::get('questions/{questionId}/validation-rules', [ChecklistQuestionController::class, 'getValidationRules']);
+});
+
+// Installation checklist routes
+Route::prefix('installations/{installationId}')->group(function () {
+
+    // Get checklist structure for installation
+    Route::get('checklist/structure', [InstallationChecklistController::class, 'getChecklistStructure']);
+
+    // Draft management
+    Route::prefix('checklist/draft')->group(function () {
+        Route::get('/', [InstallationChecklistController::class, 'getDraft']);
+        Route::post('/', [InstallationChecklistController::class, 'saveDraft']);
+        Route::delete('/', [InstallationChecklistController::class, 'deleteDraft']);
+    });
+
+    // Submit checklist
+    Route::post('checklist/submit', [InstallationChecklistController::class, 'submitChecklist']);
+
+    // Get submitted checklists for installation
+    Route::get('checklists', [InstallationChecklistController::class, 'getInstallationChecklists']);
+
+    // Installation checklist answers
+    Route::prefix('checklists/{installationChecklistId}/answers')->group(function () {
+        Route::get('/', [InstallationChecklistAnswerController::class, 'index']);
+        Route::post('/', [InstallationChecklistAnswerController::class, 'store']);
+        Route::post('bulk', [InstallationChecklistAnswerController::class, 'bulkUpdate']);
+        Route::get('by-section', [InstallationChecklistAnswerController::class, 'getBySection']);
+        Route::get('question/{questionCode}', [InstallationChecklistAnswerController::class, 'getByQuestionCode']);
+    });
+
+    // Installation checklist drafts (specific routes)
+    Route::prefix('drafts')->group(function () {
+        Route::get('/', [InstallationChecklistDraftController::class, 'index']);
+        Route::get('{draftId}', [InstallationChecklistDraftController::class, 'show']);
+        Route::delete('{draftId}', [InstallationChecklistDraftController::class, 'destroy']);
+    });
+});
+
+// Global draft management
+Route::prefix('drafts')->group(function () {
+    Route::get('stats', [InstallationChecklistDraftController::class, 'getStats']);
+    Route::post('cleanup', [InstallationChecklistDraftController::class, 'cleanupStaleDrafts']);
+});
+
+// Installation checklist answers direct routes
+Route::prefix('installation-checklists/{installationChecklistId}/answers')->group(function () {
+    Route::apiResource('/', InstallationChecklistAnswerController::class)->except(['store']);
+    Route::get('{answerId}', [InstallationChecklistAnswerController::class, 'show']);
+    Route::put('{answerId}', [InstallationChecklistAnswerController::class, 'update']);
+    Route::delete('{answerId}', [InstallationChecklistAnswerController::class, 'destroy']);
+});

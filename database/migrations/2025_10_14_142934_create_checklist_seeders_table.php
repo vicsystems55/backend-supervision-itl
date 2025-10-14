@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('checklists', function (Blueprint $table) {
+        Schema::create('checklist_seeders', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., "Solar Direct Drive Refrigerator Installation"
-            $table->string('version')->default('1.0');
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -25,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('checklists');
+        Schema::dropIfExists('checklist_seeders');
     }
 };
