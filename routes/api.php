@@ -131,7 +131,7 @@ Route::apiResource('installation-assignments', InstallationAssignmentController:
 Route::post('installation-assignments/bulk-assign', [InstallationAssignmentController::class, 'bulkAssign']);
 Route::post('installation-assignments/bulk-assign-atomic', [InstallationAssignmentController::class, 'bulkAssignAtomic']);
 
-
+Route::get('/installations/export/all', [InstallationController::class, 'exportAllInstallations']);
 
 /*
 |--------------------------------------------------------------------------

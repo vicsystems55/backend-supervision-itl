@@ -65,7 +65,6 @@ class InstallationController extends Controller
                 'message' => 'Installations imported successfully',
                 'data' => $stats
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Installation import failed: ' . $e->getMessage());
 
@@ -79,7 +78,7 @@ class InstallationController extends Controller
 
 
 
-     /**
+    /**
      * Display a listing of installations with filters
      */
     public function index(Request $request): JsonResponse
@@ -96,13 +95,13 @@ class InstallationController extends Controller
 
             // Apply filters
             if ($request->has('state_id') && $request->state_id) {
-                $query->whereHas('facility.state', function($q) use ($request) {
+                $query->whereHas('facility.state', function ($q) use ($request) {
                     $q->where('id', $request->state_id);
                 });
             }
 
             if ($request->has('lga_id') && $request->lga_id) {
-                $query->whereHas('facility.lga', function($q) use ($request) {
+                $query->whereHas('facility.lga', function ($q) use ($request) {
                     $q->where('id', $request->lga_id);
                 });
             }
@@ -132,7 +131,6 @@ class InstallationController extends Controller
                 'data' => $installations,
                 'message' => 'Installations retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -168,7 +166,6 @@ class InstallationController extends Controller
                 'data' => $installation,
                 'message' => 'Installation retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -207,7 +204,6 @@ class InstallationController extends Controller
                 'data' => $stats,
                 'message' => 'Statistics retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -226,7 +222,7 @@ class InstallationController extends Controller
                 'facility',
                 'facility.lga',
                 'healthOfficer'
-            ])->whereHas('facility.state', function($query) use ($stateId) {
+            ])->whereHas('facility.state', function ($query) use ($stateId) {
                 $query->where('id', $stateId);
             })->paginate(15);
 
@@ -240,7 +236,6 @@ class InstallationController extends Controller
                 ],
                 'message' => 'Installations by state retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -271,7 +266,6 @@ class InstallationController extends Controller
                 ],
                 'message' => 'Installations by facility retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -308,7 +302,6 @@ class InstallationController extends Controller
                 'data' => $installation,
                 'message' => 'Verification status updated successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -331,16 +324,16 @@ class InstallationController extends Controller
 
             if ($request->has('search') && $request->search) {
                 $searchTerm = $request->search;
-                $query->where(function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
                     $q->where('supplier', 'like', "%{$searchTerm}%")
-                      ->orWhere('product_model', 'like', "%{$searchTerm}%")
-                      ->orWhere('po_number', 'like', "%{$searchTerm}%")
-                      ->orWhereHas('facility', function($q) use ($searchTerm) {
-                          $q->where('name', 'like', "%{$searchTerm}%");
-                      })
-                      ->orWhereHas('healthOfficer', function($q) use ($searchTerm) {
-                          $q->where('name', 'like', "%{$searchTerm}%");
-                      });
+                        ->orWhere('product_model', 'like', "%{$searchTerm}%")
+                        ->orWhere('po_number', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('facility', function ($q) use ($searchTerm) {
+                            $q->where('name', 'like', "%{$searchTerm}%");
+                        })
+                        ->orWhereHas('healthOfficer', function ($q) use ($searchTerm) {
+                            $q->where('name', 'like', "%{$searchTerm}%");
+                        });
                 });
             }
 
@@ -352,7 +345,6 @@ class InstallationController extends Controller
                 'data' => $installations,
                 'message' => 'Search results retrieved successfully'
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -363,65 +355,136 @@ class InstallationController extends Controller
 
 
     // Add to InstallationController
-public function updateDeliveryStatus(Request $request, $id): JsonResponse
-{
-    try {
-        $request->validate([
-            'status' => 'required|string|in:not delivered,in transit,delivered,partially delivered'
-        ]);
+    public function updateDeliveryStatus(Request $request, $id): JsonResponse
+    {
+        try {
+            $request->validate([
+                'status' => 'required|string|in:not delivered,in transit,delivered,partially delivered'
+            ]);
 
-        $installation = Installation::find($id);
-        if (!$installation) {
+            $installation = Installation::find($id);
+            if (!$installation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Installation not found'
+                ], 404);
+            }
+
+            $installation->update(['delivery_status' => $request->status]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $installation,
+                'message' => 'Delivery status updated successfully'
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Installation not found'
-            ], 404);
+                'message' => 'Failed to update delivery status: ' . $e->getMessage()
+            ], 500);
         }
-
-        $installation->update(['delivery_status' => $request->status]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $installation,
-            'message' => 'Delivery status updated successfully'
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update delivery status: ' . $e->getMessage()
-        ], 500);
     }
-}
 
-public function updateInstallationStatus(Request $request, $id): JsonResponse
-{
-    try {
-        $request->validate([
-            'status' => 'required|string|in:not installed,in progress,installed,partially installed'
-        ]);
+    public function updateInstallationStatus(Request $request, $id): JsonResponse
+    {
+        try {
+            $request->validate([
+                'status' => 'required|string|in:not installed,in progress,installed,partially installed'
+            ]);
 
-        $installation = Installation::find($id);
-        if (!$installation) {
+            $installation = Installation::find($id);
+            if (!$installation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Installation not found'
+                ], 404);
+            }
+
+            $installation->update(['installation_status' => $request->status]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $installation,
+                'message' => 'Installation status updated successfully'
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Installation not found'
-            ], 404);
+                'message' => 'Failed to update installation status: ' . $e->getMessage()
+            ], 500);
         }
-
-        $installation->update(['installation_status' => $request->status]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $installation,
-            'message' => 'Installation status updated successfully'
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to update installation status: ' . $e->getMessage()
-        ], 500);
     }
-}
+
+    /**
+     * Export all installations to Excel (no pagination)
+     */
+    public function exportAllInstallations(Request $request): JsonResponse
+    {
+        try {
+            $query = Installation::with([
+                'facility.state',
+                'facility.lga',
+                'healthOfficer'
+            ]);
+
+            // Apply the same filters as index method
+            if ($request->has('state_id') && $request->state_id) {
+                $query->whereHas('facility.state', function ($q) use ($request) {
+                    $q->where('id', $request->state_id);
+                });
+            }
+
+            if ($request->has('lga_id') && $request->lga_id) {
+                $query->whereHas('facility.lga', function ($q) use ($request) {
+                    $q->where('id', $request->lga_id);
+                });
+            }
+
+            if ($request->has('facility_id') && $request->facility_id) {
+                $query->where('facility_id', $request->facility_id);
+            }
+
+            if ($request->has('verified') && $request->verified !== '') {
+                $query->where('verified_by_health_officer', $request->verified);
+            }
+
+            if ($request->has('supplier') && $request->supplier) {
+                $query->where('supplier', 'like', '%' . $request->supplier . '%');
+            }
+
+            if ($request->has('product_model') && $request->product_model) {
+                $query->where('product_model', 'like', '%' . $request->product_model . '%');
+            }
+
+            // Get ALL installations (no pagination)
+            $installations = $query->latest()->get();
+
+            // Transform data for export - only specified fields
+            $exportData = $installations->map(function ($installation) {
+                return [
+                    'Facility Name' => $installation->facility->name ?? 'N/A',
+                    'State' => $installation->facility->state->name ?? 'N/A',
+                    'LGA' => $installation->facility->lga->name ?? 'N/A',
+                    'Country' => $installation->country ?? 'N/A',
+                    'Delivery Status' => $installation->delivery_status ?? 'N/A',
+                    'Installation Status' => $installation->installation_status ?? 'N/A',
+                    'Health Officer' => $installation->healthOfficer->name ?? 'N/A',
+                    'Last Updated' => $installation->updated_at ? $installation->updated_at->format('Y-m-d H:i:s') : 'N/A',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $exportData,
+                'message' => 'All installations exported successfully',
+                'count' => $exportData->count(),
+                'total_count' => $installations->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to export installations: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
