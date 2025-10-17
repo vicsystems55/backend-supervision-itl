@@ -96,7 +96,7 @@ public function store(StoreImageRequest $request, Installation $installation): J
                     }
 
                 } catch (\Exception $e) {
-                    \Log::error('Watermark failed: ' . $e->getMessage());
+                    // \Log::error('Watermark failed: ' . $e->getMessage());
                     // Continue with original image if watermark fails
                 }
             }
