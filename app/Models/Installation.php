@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Installation extends Model
 {
@@ -33,6 +34,11 @@ class Installation extends Model
     public function healthOfficer()
     {
         return $this->belongsTo(HealthOfficer::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(Image::class);
     }
 
 }

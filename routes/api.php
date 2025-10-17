@@ -23,6 +23,9 @@ use App\Http\Controllers\InstallationChecklistController;
 use App\Http\Controllers\InstallationChecklistAnswerController;
 use App\Http\Controllers\InstallationChecklistDraftController;
 
+use App\Http\Controllers\ImageController;
+
+
 
 
 
@@ -213,3 +216,18 @@ Route::prefix('installation-checklists/{installationChecklistId}/answers')->grou
     Route::put('{answerId}', [InstallationChecklistAnswerController::class, 'update']);
     Route::delete('{answerId}', [InstallationChecklistAnswerController::class, 'destroy']);
 });
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('installations/{installation}')->group(function () {
+        Route::get('/images', [ImageController::class, 'index']);
+        Route::post('/images', [ImageController::class, 'store']);
+        Route::get('/images/{image}', [ImageController::class, 'show']);
+        Route::get('/images/{image}/original', [ImageController::class, 'getOriginal']);
+        Route::get('/images/{image}/watermarked', [ImageController::class, 'getWatermarked']);
+        Route::delete('/images/{image}', [ImageController::class, 'destroy']);
+        Route::get('/images/{image}/download', [ImageController::class, 'download']);
+    });
+});
+
+
+Route::get('/watermark/status', [ImageController::class, 'watermarkStatus']);
