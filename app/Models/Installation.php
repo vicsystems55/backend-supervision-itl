@@ -41,4 +41,9 @@ class Installation extends Model
         return $this->hasMany(Image::class);
     }
 
+    public function lccoPrs(): HasMany
+    {
+        return $this->hasMany(LccoPr::class);
+    }
+
 }

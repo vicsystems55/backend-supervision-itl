@@ -11,6 +11,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\InstallationController;
+use App\Http\Controllers\LccoPrController;
 use App\Http\Controllers\UserAccountsController;
 use App\Http\Controllers\Api\RolePermissionController;
 use App\Http\Controllers\InstallationAssignmentController;
@@ -231,3 +232,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 Route::get('/watermark/status', [ImageController::class, 'watermarkStatus']);
+
+// LccoPr routes (protected)
+
+    Route::get('/lcco-pr', [LccoPrController::class, 'index']);
+    Route::post('/lcco-pr', [LccoPrController::class, 'store']);
+    Route::get('/lcco-pr/{id}', [LccoPrController::class, 'show']);
+    Route::put('/lcco-pr/{id}', [LccoPrController::class, 'update']);
+
