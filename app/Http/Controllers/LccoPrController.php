@@ -70,7 +70,9 @@ class LccoPrController extends Controller
         }
 
         try {
-            $lcco = LccoPr::create($request->only([
+            $lcco = LccoPr::updateOrCreate([
+                'installation_id' => $request->installation_id
+            ],$request->only([
                 'installation_id',
                 'lcco_name',
                 'lcco_phone',
